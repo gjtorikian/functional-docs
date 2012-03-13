@@ -1,0 +1,25 @@
+{
+  "name":        "functional-docs",
+  "version":     "0.0.1",
+  "author":      "Garen Torikian",
+  "keywords":    ["documentation", "docs", "testing", "html"],
+  "description": "A documentation test suite for HTML files",
+  "licenses":     [{
+    "type":       "GPL",
+    "url":        "http://github.com/gjtorikian/functional-docs/raw/master/LICENSE"
+  }],
+
+  "repository" : {
+    "type" : "git",
+    "url" : "http://github.com/gjtorikian/functional-docs.git"
+  },
+
+  "dependencies": {
+    "async": "~0.1.18",
+    "wrench": "~1.3.7",
+    "jsdom": "~0.2.13",
+    "findit": "~0.1.2"
+  },
+
+  "main": "index.js"
+}

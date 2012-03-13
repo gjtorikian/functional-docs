@@ -19,7 +19,7 @@ exports.checkMissingImage = function(filename, doc, callback) {
     			try {
     				fs.statSync(path.resolve(path.dirname(filename), src));
     			} catch (err) {
-    				errors.push(printMessage("Image src file does not exist", filename));//, l, lines[l]));
+    				errors.push(printMessage("Image " + src + " file does not exist", filename));//, l, lines[l]));
 				}
     		}
     	}

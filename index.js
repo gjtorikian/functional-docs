@@ -7,7 +7,8 @@ var preTest = require('./pre'),
 
 var async = require('async'),
     findit = require('findit'),
-    jsdom = require('jsdom');
+    jsdom = require('jsdom'),
+    colors = require('colors');
 
 var srcFiles, outFiles, ext;
 
@@ -15,6 +16,7 @@ exports.runTests = function(srcDir, options, callback) {
   var stopOnFail = options.stopOnFail || false;
   ext = options.ext || ".html";
 
+  console.log("Running tests...");
   loadFiles(srcDir, function(err, srcFiles) {
     if (err) {
       console.error(err);
@@ -63,10 +65,10 @@ exports.runTests = function(srcDir, options, callback) {
 
 function checkForErrors(errors, breakOnFail, callback) {
   for (var e in errors) {
-    console.error(errors[e]);
+    console.error(errors[e].red);
   }
   if (breakOnFail) {
-    console.error("Halting due to failures");
+    console.error("Halting due to failures".red);
     process.exit(1);
   }
   callback(null);

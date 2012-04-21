@@ -98,9 +98,17 @@ function casedFileCheck(href, file, filepath, errors)
 	refFileName = href.substr(lastSlashPos + 1);
 
 	if (refDirName.length == 0 || lastSlashPos < 0) {
-		refDirName = "./";
+		refDirName = path.dirname(filepath);
 	}
 
+    try {
+    	fs.lstatSync(refDirName);
+    }
+    catch (e) {
+        errors.push(printMessage(file + " is trying to link to " + refDirName + ", which isn't a directory", file));
+        return false;
+    }
+    
 	var refFiles = wrench.readdirSyncRecursive(refDirName);
 
 	for (var r in refFiles)

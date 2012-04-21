@@ -65,10 +65,10 @@ exports.runTests = function(srcDir, options, callback) {
 
 function checkForErrors(errors, breakOnFail, callback) {
   for (var e in errors) {
-    console.error(errors[e].red);
+    console.error(errors[e].magenta);
   }
   if (breakOnFail) {
-    console.error("Halting due to failures".red);
+    console.error("Halting due to failures".magenta);
     process.exit(1);
   }
   callback(null);

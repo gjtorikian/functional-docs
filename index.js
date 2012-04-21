@@ -8,7 +8,8 @@ var preTest = require('./pre'),
 var async = require('async'),
     findit = require('findit'),
     jsdom = require('jsdom'),
-    wrench = require('wrench');
+    wrench = require('wrench'),
+    colors = require('colors');
 
 var srcFiles, outFiles, ext;
 
@@ -18,13 +19,14 @@ exports.runTests = function(srcDir, options, callback) {
   var stopOnFail = options.stopOnFail || false;
   ext = options.ext || ".html";
 
-  console.log("Running tests...");
+  console.log("Running tests on " + srcDir);
 
   loadFiles(srcDir, function(err, srcFiles) {
     if (err) {
       console.error(err);
       process.exit(1);
     }
+
     async.forEach(srcFiles, function(file, forEachCB) { // slower, but using batches to prevent EMFILE, Too many open files
       fs.readFile(file, 'utf8', function(err, content) {
         if (err) {

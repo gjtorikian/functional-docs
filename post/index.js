@@ -1,8 +1,9 @@
 var util = require("util");
 var fs = require('fs');
 var path = require('path');
-var wrench = require('wrench');
+
 var jsdom = require('jsdom');
+var async = require('async');
 
 exports.checkMissingImage = function(filename, doc, callback) {
 	var errors = [];
@@ -17,7 +18,7 @@ exports.checkMissingImage = function(filename, doc, callback) {
     		}
     		else {
     			try {
-    				fs.statSync(path.resolve(path.dirname(filename), src));
+    				fs.lstatSync(path.resolve(path.dirname(filename), src));
     			} catch (err) {
     				errors.push(printMessage("Image " + src + " file does not exist", filename));//, l, lines[l]));
 				}
@@ -28,7 +29,7 @@ exports.checkMissingImage = function(filename, doc, callback) {
   callback(errors);
 };
 
-exports.checkBrokenLocalLink = function(filename, doc, callback) {
+exports.checkBrokenLocalLink = function(filename, doc, readFiles, callback) {
 	var errors = [];
 	var aList = doc.getElementsByTagName("a");
 
@@ -53,20 +54,23 @@ exports.checkBrokenLocalLink = function(filename, doc, callback) {
 							if (casedFileCheck(hashFile, filename, filepath, errors)) {
 								//console.log(hashFile + " is legit.");
 								// then, validate the hash ref
-								var content = fs.readFileSync(filepath, 'utf8');
-	        						/*if (err) {
-	          							console.error("Error: " + err);
-	          							process.exit(1);
-	        						}*/
-	        						var hashDoc = jsdom.jsdom(content);
 
-	        						if (hashDoc.getElementById(hashId) === null) {
-	        							errors.push(printMessage(hashFile + " has an incorrect external hash to '#" + hashId +"'", filename));
-	        						}
-	        						else {
-	        							//console.log("Yes, " + hashFile + "#" + hashId + " is okay.");
-	        						}
-	        					//});
+								// prevent too many files from being read--just see if the content exists already
+								var hashDoc = readFiles[filepath];
+
+								if (hashDoc == undefined) {
+									var content = fs.readFileSync(filepath, 'utf8');
+		        					hashDoc = jsdom.jsdom(content);
+	        						readFiles[filepath] = hashDoc;
+								}
+
+								// do the actual check (finally!)
+        						if (hashDoc.getElementById(hashId) === null) {
+        							errors.push(printMessage(hashFile + " has an incorrect external hash to '#" + hashId +"'", filename));
+        						}
+        						else {
+        							//console.log("Yes, " + hashFile + "#" + hashId + " is okay.");
+        						}
 							} 
 			 			} 
 			 			else { // if the hash file doesn't exist, this is an internal hash (i.e. "href='#blah'")
@@ -108,20 +112,14 @@ function casedFileCheck(href, file, filepath, errors)
         errors.push(printMessage(file + " is trying to link to " + refDirName + ", which isn't a directory", file));
         return false;
     }
-    
-	var refFiles = wrench.readdirSyncRecursive(refDirName);
 
-	for (var r in refFiles)
-	{
-		if (refFiles[r].indexOf(refFileName) >=0) {
-			found = true;
-		}
-	}
-
-	if (found == false && href.length > 0) {
+    try {
+    	fs.lstatSync(refDirName + "/" + refFileName);
+    }
+    catch (e) {
 		errors.push(printMessage(file + " is trying to incorrectly link to " + href + " as " + filepath, file));
 		return false;
-	}	
+    }
 
 	return true;
 }

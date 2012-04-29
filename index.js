@@ -27,8 +27,9 @@ exports.runTests = function(srcDir, options, callback) {
       process.exit(1);
     }
 
-    async.forEach(srcFiles, function(file, forEachCB) { // slower, but using batches to prevent EMFILE, Too many open files
-      fs.readFile(file, 'utf8', function(err, content) {
+    async.forEach(srcFiles, function(fileName, forEachCB) { 
+      var file = srcDir + "/" + fileName;
+      fs.readFile(file, 'utf8', function(err, content) { 
         if (err) {
           if (!fs.lstatSync(file).isDirectory()) {
             console.error("Error starting to read file " + file);

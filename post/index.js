@@ -106,12 +106,12 @@ function casedFileCheck(href, file, filepath, errors)
     }
     
     refDirName = path.resolve(path.dirname(file), refDirName);
-    if (!path.existsSync(refDirName)) {
+    if (!fs.existsSync(refDirName)) {
         errors.push(printMessage(file + " is trying to link to " + refDirName + ", which isn't a directory", file));
         return false;
     }
 
-    if (!path.existsSync(refDirName + "/" + refFileName)) {
+    if (!fs.existsSync(refDirName + "/" + refFileName)) {
         errors.push(printMessage(file + " is trying to incorrectly link to " + href + " as " + filepath, file));
         return false;
     }

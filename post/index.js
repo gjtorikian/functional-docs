@@ -1,9 +1,7 @@
-var util = require("util");
 var fs = require('fs');
 var path = require('path');
 
 var jsdom = require('jsdom');
-var async = require('async');
 
 exports.checkMissingImage = function(filename, doc, callback) {
     var errors = [];
@@ -13,7 +11,7 @@ exports.checkMissingImage = function(filename, doc, callback) {
         for (var i = 0; i < imgList.length; i++) {
             var src = imgList[i].getAttribute("src");
 
-            if (src === undefined || src.length == 0) {
+            if (src === undefined || src.length === 0) {
                 errors.push(printMessage("Missing src attribute", filename));//, l, lines[l]));
             }
             else {
@@ -74,9 +72,20 @@ exports.checkBrokenLocalLink = function(filename, doc, readFiles, callback) {
                             } 
                         } 
                         else { // if the hash file doesn't exist, this is an internal hash (i.e. "href='#blah'")
-                            if (doc.getElementById(hashId) == null) {
-                                // get attributes "name"
-                                errors.push(printMessage(filename + " has an incorrect internal hash to '#" + hashId + "'", filename));
+                            if (doc.getElementById(hashId) === null) {
+                                // checking the name attribute; I weep to do this twice
+                                var foundName = false;
+                                var links = document.getElementsByTagName('a');
+                                
+                                for(var i = 0; i< links.length; i++){
+                                  var n = links[i].getAttribute("name");
+                                  if (n && n == hashId) {
+                                      found = true;
+                                      break;
+                                  }
+                                }
+                                if (!found)
+                                    errors.push(printMessage(filename + " has an incorrect internal hash to '#" + hashId + "'", filename));
                             }
                             else {
                                 //console.log("Yes, " + filename + "#" + hashId + " is okay.");
@@ -99,9 +108,9 @@ function casedFileCheck(href, file, filepath, errors)
     var found = false;
     var lastSlashPos = href.lastIndexOf("/");
     var refDirName = href.substr(0, lastSlashPos);
-    refFileName = href.substr(lastSlashPos + 1);
+    var refFileName = href.substr(lastSlashPos + 1);
 
-    if (refDirName.length == 0 || lastSlashPos < 0) {
+    if (refDirName.length === 0 || lastSlashPos < 0) {
         refDirName = path.dirname(filepath);
     }
     
@@ -121,4 +130,4 @@ function casedFileCheck(href, file, filepath, errors)
 
 function printMessage(msg, filename, line, string) {
   return msg + " in " + path.basename(filename);// + " around line " + line + ": " + string;
-};
+}

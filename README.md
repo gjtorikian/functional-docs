@@ -4,7 +4,7 @@ Generate HTML files? Use them for documentation? Great, then this tool might be 
 
 Here are a set of tests to validate your HTML output. These tests check if your image references are legitimate, if they have alt tags, if your internal links are working, and so on. It's intended to be an all-in-one checker for your documentation output.
 
-This does **not** check for grammar or spelling mistakes, nor will it ever. Shame on you.
+This does **not** check for grammar or spelling mistakes, nor stylistic issues (_e.g._, typing _e.g._ instead of e.g.)...but it might one day.
 
 # Usage
 
@@ -40,4 +40,4 @@ funcDoc.runTests([ './files'], {stopOnFail: false, ext: ".html"}, function(err) 
 
 If you think about it, some tests can actually be run _before_ you compile into HTML. For example, if I was writing documentation in Markdown ([which I do](https://github.com/gjtorikian/panda-docs)), I could just check to see if `![]` was erronously references. I've grouped this distinction in folders marked _pre_ and _post_.
 
-Then I started thinking that users might write their docs in reStructuredText, AsciiDoc, Pandoc, or some other format, so I decided to just focus right now on the rendered HTML output.
+Then I started thinking that users might write their docs in reStructuredText, AsciiDoc, Pandoc, or some other format, so I decided to just focus right now on the rendered HTML output, and concentrate on catching formats as time allowed.

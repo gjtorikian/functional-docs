@@ -75,7 +75,7 @@ exports.checkBrokenLocalLink = function(filename, doc, readFiles, callback) {
                             if (doc.getElementById(hashId) === null) {
                                 // checking the name attribute; I weep to do this twice
                                 var foundName = false;
-                                var links = document.getElementsByTagName('a');
+                                var links = doc.getElementsByTagName('a');
                                 
                                 for(var i = 0; i< links.length; i++){
                                   var n = links[i].getAttribute("name");

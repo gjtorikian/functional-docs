@@ -76,15 +76,15 @@ exports.checkBrokenLocalLink = function(filename, doc, readFiles, callback) {
                                 // checking the name attribute; I weep to do this twice
                                 var foundName = false;
                                 var links = doc.getElementsByTagName('a');
-                                
-                                for(var i = 0; i< links.length; i++){
-                                  var n = links[i].getAttribute("name");
+                          
+                                for (var l = 0; l< links.length; l++){
+                                  var n = links[l].getAttribute("name");
                                   if (n && n == hashId) {
-                                      found = true;
+                                      foundName = true;
                                       break;
                                   }
                                 }
-                                if (!found)
+                                if (!foundName)
                                     errors.push(printMessage(filename + " has an incorrect internal hash to '#" + hashId + "'", filename));
                             }
                             else {

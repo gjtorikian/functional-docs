@@ -1,6 +1,6 @@
 {
   "name":        "functional-docs",
-  "version":     "0.1.0",
+  "version":     "0.1.1",
   "author":      "Garen Torikian",
   "keywords":    ["documentation", "docs", "testing", "html"],
   "description": "A documentation test suite for HTML files",

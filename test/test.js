@@ -1,5 +1,5 @@
 var funcDoc = require('../index.js');
 
-funcDoc.runTests([ './files'], {stopOnFail: false, ext: ".html"}, function(err, results) {
+funcDoc.runTests([ './files'], {stopOnFail: false, ext: ".html", mapPrefix: true}, function(err, results) {
 	//console.log("Nothing.");
 });

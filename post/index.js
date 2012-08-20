@@ -3,7 +3,7 @@ var path = require('path');
 
 var jsdom = require('jsdom');
 
-exports.checkMissingImage = function(filename, doc, callback) {
+exports.checkMissingImage = function(filename, doc, options, callback) {
     var errors = [];
     var imgList = doc.getElementsByTagName("img");
 
@@ -16,6 +16,9 @@ exports.checkMissingImage = function(filename, doc, callback) {
             }
             else {
                 try {
+                    if (options.mapPrefix && src.charAt(0) == "/") {
+                        src = "." + src;
+                    }
                     fs.lstatSync(path.resolve(path.dirname(filename), src));
                 } catch (err) {
                     errors.push(printMessage("Image " + src + " file does not exist", filename));//, l, lines[l]));
@@ -27,7 +30,7 @@ exports.checkMissingImage = function(filename, doc, callback) {
   callback(errors);
 };
 
-exports.checkBrokenLocalLink = function(filename, doc, readFiles, callback) {
+exports.checkBrokenLocalLink = function(filename, doc, readFiles, options, callback) {
     var errors = [];
     var aList = doc.getElementsByTagName("a");
 

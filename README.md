@@ -25,9 +25,10 @@ funcDoc.runTests([ './files'], {stopOnFail: false, ext: ".html"}, function(err) 
 `runTests()` takes three parameters:
 
 * An array of directories, with files you want to test
-* An object specifying various ways to run the tests. Though some of the properties are optional, the paramter itself is not:
+* An object specifying various ways to run the tests. Though some of the properties are optional, the parameter itself is not:
 	* `stopOnFail` indicates if you want the testing to stop once a failure is found; defaults to `false`
 	* `ext` indicates the extension of the files you want to test; defaults to ".html"
+	* `mapPrefix`: if images start with a `/`, the test assumes it's at `./`. This is mostly for routing compatability with express.
 * A callback function to execute upon completion
 
 # What's Tested?

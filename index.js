@@ -44,22 +44,22 @@ exports.runTests = function(srcDir, options, callback) {
 
           async.parallel([
               function(cb) {
-                preTest.checkMissingAltTag(file, doc, function(errors) {
+                preTest.checkMissingAltTag(file, doc, options, function(errors) {
                   checkForErrors(errors, stopOnFail, cb);
                 });
               },
               function(cb) {
-                preTest.checkBrokenExternalLink(file, doc, function(errors) {
+                preTest.checkBrokenExternalLink(file, doc, options, function(errors) {
                   checkForErrors(errors, stopOnFail, cb);
                 });
               },
               function(cb) {
-                postTest.checkMissingImage(file, doc, function(errors) {
+                postTest.checkMissingImage(file, doc, options, function(errors) {
                   checkForErrors(errors, stopOnFail, cb);
                 });
               },
               function(cb) {
-                postTest.checkBrokenLocalLink(file, doc, readFiles, function(errors) {
+                postTest.checkBrokenLocalLink(file, doc, readFiles, options, function(errors) {
                   checkForErrors(errors, stopOnFail, cb);
                 });
               }

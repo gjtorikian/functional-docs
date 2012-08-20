@@ -3,7 +3,7 @@ var http = require("http");
 var async = require('async');
 var url = require('url');
 
-exports.checkMissingAltTag = function(filename, doc, callback) {
+exports.checkMissingAltTag = function(filename, doc, options, callback) {
 	var errors = [];
 	var imgList = doc.getElementsByTagName("img");
 
@@ -20,7 +20,7 @@ exports.checkMissingAltTag = function(filename, doc, callback) {
   callback(errors);
 };
 
-exports.checkBrokenExternalLink = function(filename, doc, callback) {
+exports.checkBrokenExternalLink = function(filename, doc, options, callback) {
 	var errors = [];
 	var aList = doc.getElementsByTagName("a");
 

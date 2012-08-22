@@ -11,13 +11,14 @@ var async = require('async'),
     wrench = require('wrench'),
     colors = require('colors');
 
-var srcFiles, outFiles, ext;
+var srcDir, srcFiles, outFiles, ext, stopOnFail;
 
 var readFiles = {};
 
-exports.runTests = function(srcDir, options, callback) {
-  var stopOnFail = options.stopOnFail || false;
+exports.runTests = function(src, options, callback) {
+  stopOnFail = options.stopOnFail || false;
   ext = options.ext || ".html";
+  srcDir = src;
 
   console.log("Running tests on " + srcDir);
 
@@ -27,63 +28,69 @@ exports.runTests = function(srcDir, options, callback) {
       process.exit(1);
     }
 
-    async.forEach(srcFiles, function(fileName, forEachCB) { 
-      var file = srcDir + "/" + fileName;
-      if (file.match(new RegExp(ext + "$"))) {
-        fs.readFile(file, 'utf8', function(err, content) { 
-          if (err) {
-            if (!fs.lstatSync(file).isDirectory()) {
-              console.error("Error starting to read file " + file);
-              console.error(err);
-              process.exit(1);
-            }
-          }
-          var doc = jsdom.jsdom(content);
-
-          readFiles[file] = doc;
-
-          async.parallel([
-              function(cb) {
-                preTest.checkMissingAltTag(file, doc, options, function(errors) {
-                  checkForErrors(errors, stopOnFail, cb);
-                });
-              },
-              function(cb) {
-                preTest.checkBrokenExternalLink(file, doc, options, function(errors) {
-                  checkForErrors(errors, stopOnFail, cb);
-                });
-              },
-              function(cb) {
-                postTest.checkMissingImage(file, doc, options, function(errors) {
-                  checkForErrors(errors, stopOnFail, cb);
-                });
-              },
-              function(cb) {
-                postTest.checkBrokenLocalLink(file, doc, readFiles, options, function(errors) {
-                  checkForErrors(errors, stopOnFail, cb);
-                });
-              }
-          ], function(err, results) {
-              forEachCB(null);
-          });
-        });
-      }
-    }, function (err, results) {
+    async.forEach(srcFiles, runIndividualTest, function (err) {
         console.log("Finished running tests on " + srcDir);
         callback(err);
-    })
-  })
+    });
+  });
 };
 
-function checkForErrors(errors, breakOnFail, callback) {
-  for (var e in errors) {
-    console.error(errors[e].magenta);
+function runIndividualTest(fileName, callback) {
+  var file = srcDir + "/" + fileName;
+  if (file.match(new RegExp(ext + "$"))) {
+    fs.readFile(file, 'utf8', function(err, content) { 
+      if (err) {
+        if (!fs.lstatSync(file).isDirectory()) {
+          console.error("Error starting to read file " + file);
+          console.error(err);
+          process.exit(1);
+        }
+      }
+      var doc = jsdom.jsdom(content);
+
+      readFiles[file] = doc;
+      async.parallel([
+          function(cb) {
+            preTest.checkMissingAltTag(file, doc, function(errors) {
+              checkForErrors(errors, stopOnFail, cb);
+            });
+          },
+          function(cb) {
+            preTest.checkBrokenExternalLink(file, doc, function(errors) {
+              checkForErrors(errors, stopOnFail, cb);
+            });
+          },
+          function(cb) {
+            postTest.checkMissingImage(file, doc, function(errors) {
+              checkForErrors(errors, stopOnFail, cb);
+            });
+          },
+          function(cb) {
+            postTest.checkBrokenLocalLink(file, doc, readFiles, function(errors) {
+              checkForErrors(errors, stopOnFail, cb);
+            });
+          }
+      ], function(err, results) {
+          callback(err);
+      });
+    });
   }
-  if (breakOnFail) {
-    console.error("Halting due to failures".magenta);
-    process.exit(1);
+  else {
+    callback(null);
   }
-  callback(null);
+}
+
+function checkForErrors(errors, stopOnFail, cb) {
+  while (errors.length) {
+    console.error(errors[errors.length - 1]);
+    errors.pop();
+    if (stopOnFail) {
+      console.error("Halting due to failures".magenta);
+      process.exit(1);
+    }
+  }
+
+  cb(null);
 }
 
 function loadFiles(dirs, callback) {

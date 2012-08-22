@@ -11,11 +11,12 @@ var async = require('async'),
     wrench = require('wrench'),
     colors = require('colors');
 
-var srcDir, srcFiles, outFiles, ext, stopOnFail;
+var srcDir, srcFiles, outFiles, ext, stopOnFail, options;
 
 var readFiles = {};
 
-exports.runTests = function(src, options, callback) {
+exports.runTests = function(src, opts, callback) {
+  options = opts;
   stopOnFail = options.stopOnFail || false;
   ext = options.ext || ".html";
   srcDir = src;
@@ -51,22 +52,22 @@ function runIndividualTest(fileName, callback) {
       readFiles[file] = doc;
       async.parallel([
           function(cb) {
-            preTest.checkMissingAltTag(file, doc, function(errors) {
+            preTest.checkMissingAltTag(file, doc, options, function(errors) {
               checkForErrors(errors, stopOnFail, cb);
             });
           },
           function(cb) {
-            preTest.checkBrokenExternalLink(file, doc, function(errors) {
+            preTest.checkBrokenExternalLink(file, doc, options, function(errors) {
               checkForErrors(errors, stopOnFail, cb);
             });
           },
           function(cb) {
-            postTest.checkMissingImage(file, doc, function(errors) {
+            postTest.checkMissingImage(file, doc, options, function(errors) {
               checkForErrors(errors, stopOnFail, cb);
             });
           },
           function(cb) {
-            postTest.checkBrokenLocalLink(file, doc, readFiles, function(errors) {
+            postTest.checkBrokenLocalLink(file, doc, readFiles, options, function(errors) {
               checkForErrors(errors, stopOnFail, cb);
             });
           }

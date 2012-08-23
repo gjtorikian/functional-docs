@@ -12,7 +12,7 @@ exports.checkMissingAltTag = function(filename, doc, options, callback) {
     		var alt = imgList[i].getAttribute("alt");
 
     		if (alt === undefined || alt.length == 0) {
-    			errors.push(printMessage("Missing alt attribute", filename));//, l, lines[l]));
+    			errors.push(printMessage("Image " + imgList[i].getAttribute("src") + " has a missing alt attribute", filename));//, l, lines[l]));
     		}
     	}
     }

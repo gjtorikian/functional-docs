@@ -36,6 +36,7 @@ funcDoc.runTests([ './files'], {stopOnFail: false, ext: ".html"}, function(err) 
 * Whether all your images have alt tags
 * Whether your internal image references are not broken
 * Whether your internal links are not broken; this includes hash references (`#linkToMe`)
+* Case-sensitivity for your files and images
 
 ## Pre- and Post Tests?
 

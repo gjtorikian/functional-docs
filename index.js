@@ -83,7 +83,7 @@ function runIndividualTest(fileName, callback) {
 
 function checkForErrors(errors, stopOnFail, cb) {
   while (errors.length) {
-    console.error(errors[errors.length - 1]);
+    console.error(errors[errors.length - 1].red);
     errors.pop();
     if (stopOnFail) {
       console.error("Halting due to failures".magenta);

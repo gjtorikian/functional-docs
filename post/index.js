@@ -1,7 +1,10 @@
 var fs = require('fs');
 var path = require('path');
 
-var jsdom = require('jsdom');
+var jsdom = require('jsdom'),
+    wrench = require('wrench');
+
+var helpers = require('../helpers');
 
 exports.checkMissingImage = function(filename, doc, options, callback) {
     var errors = [];
@@ -15,13 +18,32 @@ exports.checkMissingImage = function(filename, doc, options, callback) {
                 errors.push(printMessage("Missing src attribute", filename));//, l, lines[l]));
             }
             else {
-                try {
-                    if (options.mapPrefix && src.charAt(0) == "/") {
-                        src = "." + src;
+                if (options.mapPrefix && src.charAt(0) == "/") {
+                    src = "." + src;
+                }
+                    
+                var lastSlashPos = src.lastIndexOf("/");
+                var refDirName = src.substr(0, lastSlashPos);
+                var refFileName = src.substr(lastSlashPos + 1);
+
+                if (refDirName.length === 0 || lastSlashPos < 0) {
+                    refDirName = path.dirname(filepath);
+                }
+                
+                refDirName = path.resolve(path.dirname(filename), refDirName);
+                
+                var files = wrench.readdirSyncRecursive(path.dirname(filename));
+                var filepath = path.resolve(path.dirname(filename) + "/"  + src);
+
+                if (!path.existsSync(refDirName + "/" + refFileName)) {
+                    errors.push(printMessage("Image " + src + " does not exist", filename));
+                }
+                else {
+                    var fileExists = helpers.casedFileCheck(refDirName, files, filepath);
+                    
+                    if (!fileExists) {
+                        errors.push(printMessage("Image " + src + " does not exist (due to case sensitivity)", filename));//, l, lines[l]));
                     }
-                    fs.lstatSync(path.resolve(path.dirname(filename), src));
-                } catch (err) {
-                    errors.push(printMessage("Image " + src + " file does not exist", filename));//, l, lines[l]));
                 }
             }
         }
@@ -52,7 +74,7 @@ exports.checkBrokenLocalLink = function(filename, doc, readFiles, options, callb
                             filepath = path.resolve(path.dirname(filename) + "/"  + hashFile);
 
                             // check if file exists first
-                            if (casedFileCheck(hashFile, filename, filepath, errors)) {
+                            if (fileCheck(hashFile, filename, filepath, false, errors)) {
                                 //console.log(hashFile + " is legit.");
                                 // then, validate the hash ref
 
@@ -96,7 +118,7 @@ exports.checkBrokenLocalLink = function(filename, doc, readFiles, options, callb
                         }
                     }
                     else {
-                        casedFileCheck(href, filename, filepath, errors);
+                        fileCheck(href, filename, filepath, true, errors);
                     }
                 }
             }
@@ -106,7 +128,7 @@ exports.checkBrokenLocalLink = function(filename, doc, readFiles, options, callb
   callback(errors);
 };
 
-function casedFileCheck(href, file, filepath, errors)
+function fileCheck(href, file, filepath, noHash, errors)
 {
     var found = false;
     var lastSlashPos = href.lastIndexOf("/");
@@ -118,6 +140,7 @@ function casedFileCheck(href, file, filepath, errors)
     }
     
     refDirName = path.resolve(path.dirname(file), refDirName);
+
     if (!path.existsSync(refDirName)) {
         errors.push(printMessage(file + " is trying to link to " + refDirName + ", which isn't a directory", file));
         return false;
@@ -128,6 +151,16 @@ function casedFileCheck(href, file, filepath, errors)
         return false;
     }
     
+    if (noHash) {
+        var files = wrench.readdirSyncRecursive(refDirName);
+        var fileExists = helpers.casedFileCheck(refDirName, files, filepath);
+
+        if (!fileExists) {
+            errors.push(printMessage(file + " is trying to incorrectly link to " + href + " (due to case sensitivity) as " + filepath, file));
+            return false;
+        }
+    }
+
     return true;
 }
 

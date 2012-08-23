@@ -31,7 +31,7 @@ exports.runTests = function(src, opts, callback) {
 
     async.forEach(srcFiles, runIndividualTest, function (err) {
         console.log("Finished running tests on " + srcDir);
-        callback(err);
+        return callback(err);
     });
   });
 };
@@ -47,32 +47,35 @@ function runIndividualTest(fileName, callback) {
           process.exit(1);
         }
       }
-      var doc = jsdom.jsdom(content);
 
-      readFiles[file] = doc;
-      async.parallel([
-          function(cb) {
-            preTest.checkMissingAltTag(file, doc, options, function(errors) {
-              checkForErrors(errors, stopOnFail, cb);
-            });
-          },
-          function(cb) {
-            preTest.checkBrokenExternalLink(file, doc, options, function(errors) {
-              checkForErrors(errors, stopOnFail, cb);
-            });
-          },
-          function(cb) {
-            postTest.checkMissingImage(file, doc, options, function(errors) {
-              checkForErrors(errors, stopOnFail, cb);
-            });
-          },
-          function(cb) {
-            postTest.checkBrokenLocalLink(file, doc, readFiles, options, function(errors) {
-              checkForErrors(errors, stopOnFail, cb);
-            });
-          }
-      ], function(err, results) {
-          callback(err);
+      jsdom.env(content, function(err, window) {
+        doc = window.document;
+        readFiles[file] = doc;
+
+        async.parallel([
+            function(cb) {
+              preTest.checkMissingAltTag(file, doc, options, function(errors) {
+                checkForErrors(errors, stopOnFail, cb);
+              });
+            },
+            function(cb) {
+              preTest.checkBrokenExternalLink(file, doc, options, function(errors) {
+                checkForErrors(errors, stopOnFail, cb);
+              });
+            },
+            function(cb) {
+              postTest.checkMissingImage(file, doc, options, function(errors) {
+                checkForErrors(errors, stopOnFail, cb);
+              });
+            },
+            function(cb) {
+              postTest.checkBrokenLocalLink(file, doc, readFiles, options, function(errors) {
+                checkForErrors(errors, stopOnFail, cb);
+              });
+            }
+          ], function(err, results) {
+              callback(err);
+        });
       });
     });
   }

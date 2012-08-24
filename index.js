@@ -6,7 +6,6 @@ var preTest = require('./pre/pre_tests'),
     postTest = require('./post/post_tests');
 
 var async = require('async'),
-    findit = require('findit'),
     jsdom = require('jsdom'),
     wrench = require('wrench'),
     colors = require('colors');

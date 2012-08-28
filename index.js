@@ -48,6 +48,10 @@ function runIndividualTest(fileName, callback) {
       }
 
       jsdom.env(content, function(err, window) {
+        if (err) {
+          console.log(error);
+        }
+        
         doc = window.document;
         readFiles[file] = doc;
 

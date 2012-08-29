@@ -61,7 +61,7 @@ exports.checkBrokenLocalLink = function(filename, doc, readFiles, options, callb
 
             if (href !== undefined && href.length > 0) {
                 // not an external link, or ignorable link (/,, #)
-                if (!href.match(/www/) && !href.match(/http:/) && !href.match(/https:/) && href !== '/' && href != '#' && href != 'javascript:void(0)')  {
+                if (!href.match(/www/) && !href.match(/https?:/) && !href.match(/^mailto:/) && href !== '/' && href != '#' && href != 'javascript:void(0)')  {
                     var filepath = path.resolve(path.dirname(filename) + "/"  + href);
                 
                     if (href.match(/\#/)) { // a reference to somewhere internal

@@ -85,9 +85,14 @@ exports.checkBrokenLocalLink = function(filename, $, readFiles, options, callbac
                                     hash$ = cheerio.load(content);
                                     readFiles[filepath] = hash$;
                                 }
-                                
+
+                                var hashElement = $("#" + hashId);
+                                var hashName = $("[name=" + hashId + "]");
+
                                 // do the actual check (finally!)
-                                if (hash$('#' + hashId).text().length == 0) {
+                                if (hashElement === undefined && hashName === undefined) {
+                                    console.log(hashElement)
+                                    console.log(hashName)
                                     errors.push(printMessage(filename, hashFile + " has an incorrect external hash to '#" + hashId +"'"));
                                 }
                                 else {
@@ -104,16 +109,11 @@ exports.checkBrokenLocalLink = function(filename, $, readFiles, options, callbac
                                 var foundName = false;
                                 var links = $('a');
                           
-                                for (var l = 0; l< links.length; l++){
-                                  var aName = $(links[l]).attr("name");
-                                  var aId = $(links[l]).attr("id");
-                                  if ( (aName && aName == hashId) || (aId && aId == hashId) ){
-                                      foundName = true;
-                                      break;
-                                  }
-                                }
-                                if (!foundName)
+                                var hashElement = $("#" + hashId);
+                                var hashName = $("[name=" + hashId + "]");
+                                if (hashElement === undefined && hashName === undefined) {
                                     errors.push(printMessage(filename, "found an an incorrect internal hash to '#" + hashId + "'"));
+                                }
                             }
                             else {
                                 //console.log("Yes, " + filename + "#" + hashId + " is okay.");

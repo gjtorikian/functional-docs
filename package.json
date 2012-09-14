@@ -1,11 +1,11 @@
 {
   "name":        "functional-docs",
-  "version":     "0.1.8",
+  "version":     "0.1.9",
   "author":      "Garen Torikian",
   "keywords":    ["documentation", "docs", "testing", "html"],
   "description": "A documentation test suite for HTML files",
   "licenses":     [{
-    "type":       "GPL",
+    "type":       "MIT",
     "url":        "http://github.com/gjtorikian/functional-docs/raw/master/LICENSE"
   }],
 

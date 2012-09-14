@@ -12,7 +12,7 @@ exports.checkMissingAltTag = function(filename, $, options, callback) {
     		var alt = $(imgList[i]).attr("alt");
 
     		if (alt === undefined || alt.length == 0) {
-    			errors.push(printMessage("Image " + $(imgList[i]).attr("src") + " has a missing alt attribute", filename));//, l, lines[l]));
+    			errors.push(printMessage(filename, "image " + $(imgList[i]).attr("src") + " has a missing alt attribute"));//, l, lines[l]));
     		}
     	}
     }
@@ -29,7 +29,7 @@ exports.checkBrokenExternalLink = function(filename, $, options, callback) {
     		var href = $(el).attr("href");
 
             if (href === undefined) {
-                errors.push(printMessage("Anchor " + $(el) + " has a missing href attribute", filename));
+                errors.push(printMessage(filename, "anchor " + $(el) + " has a missing href attribute"));
             }
     		else if (href.match(/www/) || href.match(/http:/) || href.match(/https:/)) {
     			var parsedUrl = url.parse(href);
@@ -53,6 +53,6 @@ exports.checkBrokenExternalLink = function(filename, $, options, callback) {
     }
 };
 
-function printMessage(msg, filename, line, string) {
-  return msg + " in " + filename;// + " around line " + line + ": " + string;
+function printMessage(filename, msg, line, string) {
+  return filename + ": " + msg ;// + " around line " + line + ": " + string;
 };

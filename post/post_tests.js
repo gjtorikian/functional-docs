@@ -15,7 +15,7 @@ exports.checkMissingImage = function(filename, $, options, callback) {
             var src = $(imgList[i]).attr("src");
 
             if (src === undefined || src.length === 0) {
-                errors.push(printMessage("Missing src attribute", filename));//, l, lines[l]));
+                errors.push(filename, printMessage("Missing src attribute"));//, l, lines[l]));
             }
             else {
                 if (options.mapPrefix && src.charAt(0) == "/") {
@@ -34,14 +34,14 @@ exports.checkMissingImage = function(filename, $, options, callback) {
                 refDirName = path.resolve(path.dirname(filename), refDirName);
 
                 if (!path.existsSync(refDirName + "/" + refFileName)) {
-                    errors.push(printMessage("Image " + src + " does not exist", filename));
+                    errors.push(printMessage(filename,  "image " + src + " does not exist"));
                 }
                 else {
                     var files = wrench.readdirSyncRecursive(refDirName);
                     var fileExists = helpers.casedFileCheck(refDirName, files, filepath);
                     
                     if (!fileExists) {
-                        errors.push(printMessage("Image " + src + " does not exist (due to case sensitivity)", filename));//, l, lines[l]));
+                        errors.push(printMessage(filename, "image " + src + " does not exist (due to case sensitivity)"));//, l, lines[l]));
                     }
                 }
             }
@@ -68,48 +68,52 @@ exports.checkBrokenLocalLink = function(filename, $, readFiles, options, callbac
                         var hashFile = href.substr(0, href.indexOf("#"));
                         var hashId = href.substr(href.indexOf("#") + 1); 
 
-                        if (hashFile.length > 0)
-                        {
+                        // there's a file associated with the hash
+                        if (hashFile.length > 0) {
                             filepath = path.resolve(path.dirname(filename) + "/"  + hashFile);
-
+                            
                             // check if file exists first
                             if (fileCheck(hashFile, filename, filepath, false, errors)) {
-                                //console.log(hashFile + " is legit.");
+                                // console.log(hashFile + " is legit. Let's check " + hashId);
                                 // then, validate the hash ref
 
                                 // prevent too many files from being read--just see if the content exists already
                                 var hash$ = readFiles[filepath];
-
+                                
                                 if (hash$ == undefined) {
                                     var content = fs.readFileSync(filepath, 'utf8');
                                     hash$ = cheerio.load(content);
                                     readFiles[filepath] = hash$;
                                 }
-
+                                
                                 // do the actual check (finally!)
-                                if (hash$('#' + hashId) === null) {
-                                    errors.push(printMessage(hashFile + " has an incorrect external hash to '#" + hashId +"'", filename));
+                                if (hash$('#' + hashId).text().length == 0) {
+                                    errors.push(printMessage(filename, hashFile + " has an incorrect external hash to '#" + hashId +"'"));
                                 }
                                 else {
                                     //console.log("Yes, " + hashFile + "#" + hashId + " is okay.");
                                 }
                             } 
+                            else {
+                                errors.push(printMessage(filename, "found an external hash to a file that doesn't exist (" + filepath + ")"));
+                            }
                         } 
                         else { // if the hash file doesn't exist, this is an internal hash (i.e. "href='#blah'")
-                            if ($('#' + hashId) === null) {
-                                // checking the name attribute; I weep to do this twice
+                            if ($('#' + hashId) !== null) {
+                                // checking the name and id attributes; I weep to do this twice
                                 var foundName = false;
                                 var links = $('a');
                           
                                 for (var l = 0; l< links.length; l++){
-                                  var n = links[l].getAttribute("name");
-                                  if (n && n == hashId) {
+                                  var aName = $(links[l]).attr("name");
+                                  var aId = $(links[l]).attr("id");
+                                  if ( (aName && aName == hashId) || (aId && aId == hashId) ){
                                       foundName = true;
                                       break;
                                   }
                                 }
                                 if (!foundName)
-                                    errors.push(printMessage(filename + " has an incorrect internal hash to '#" + hashId + "'", filename));
+                                    errors.push(printMessage(filename, "found an an incorrect internal hash to '#" + hashId + "'"));
                             }
                             else {
                                 //console.log("Yes, " + filename + "#" + hashId + " is okay.");
@@ -141,12 +145,12 @@ function fileCheck(href, file, filepath, noHash, errors)
     refDirName = path.resolve(path.dirname(file), refDirName);
 
     if (!path.existsSync(refDirName)) {
-        errors.push(printMessage(file + " is trying to link to " + refDirName + ", which isn't a directory", file));
+        errors.push(printMessage(file, " trying to link to " + refDirName + ", which isn't a directory"));
         return false;
     }
 
     if (!path.existsSync(refDirName + "/" + refFileName)) {
-        errors.push(printMessage(file + " is trying to incorrectly link to " + href + " as " + filepath, file));
+        errors.push(printMessage(file, " trying to incorrectly link to " + href + " as " + filepath));
         return false;
     }
     
@@ -156,7 +160,7 @@ function fileCheck(href, file, filepath, noHash, errors)
         var fileExists = helpers.casedFileCheck(refDirName, files, filepath);
 
         if (!fileExists) {
-            errors.push(printMessage(file + " is trying to incorrectly link to " + href + " (due to case sensitivity) as " + filepath, file));
+            errors.push(printMessage(file, " trying to incorrectly link to " + href + " (due to case sensitivity) as " + filepath));
             return false;
         }
     }
@@ -164,6 +168,6 @@ function fileCheck(href, file, filepath, noHash, errors)
     return true;
 }
 
-function printMessage(msg, filename, line, string) {
-  return msg + " in " + path.basename(filename);// + " around line " + line + ": " + string;
+function printMessage(filename, msg, line, string) {
+  return filename + ": " + msg;// + " around line " + line + ": " + string;
 }

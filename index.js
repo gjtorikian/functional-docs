@@ -7,7 +7,6 @@ var preTest = require('./pre/pre_tests'),
 
 var async = require('async'),
     cheerio = require('cheerio'),
-    jsdom = require('jsdom'),
     wrench = require('wrench'),
     colors = require('colors');
 

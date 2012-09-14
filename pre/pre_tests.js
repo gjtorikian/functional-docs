@@ -3,16 +3,16 @@ var http = require("http");
 var async = require('async');
 var url = require('url');
 
-exports.checkMissingAltTag = function(filename, doc, options, callback) {
+exports.checkMissingAltTag = function(filename, $, options, callback) {
 	var errors = [];
-	var imgList = doc.getElementsByTagName("img");
+	var imgList = $("img");
 
     if (imgList !== undefined) {
     	for (var i = 0; i < imgList.length; i++) {
-    		var alt = imgList[i].getAttribute("alt");
+    		var alt = $(imgList[i]).attr("alt");
 
     		if (alt === undefined || alt.length == 0) {
-    			errors.push(printMessage("Image " + imgList[i].getAttribute("src") + " has a missing alt attribute", filename));//, l, lines[l]));
+    			errors.push(printMessage("Image " + $(imgList[i]).attr("src") + " has a missing alt attribute", filename));//, l, lines[l]));
     		}
     	}
     }
@@ -20,15 +20,18 @@ exports.checkMissingAltTag = function(filename, doc, options, callback) {
   callback(errors);
 };
 
-exports.checkBrokenExternalLink = function(filename, doc, options, callback) {
+exports.checkBrokenExternalLink = function(filename, $, options, callback) {
 	var errors = [];
-	var aList = doc.getElementsByTagName("a");
+	var aList = $("a");
 
     if (aList !== undefined) {
     	async.forEach(aList, function(el, cb) {
-    		var href = el.getAttribute("href");
+    		var href = $(el).attr("href");
 
-    		if (href.match(/www/) || href.match(/http:/) || href.match(/https:/)) {
+            if (href === undefined) {
+                errors.push(printMessage("Anchor " + $(el) + " has a missing href attribute", filename));
+            }
+    		else if (href.match(/www/) || href.match(/http:/) || href.match(/https:/)) {
     			var parsedUrl = url.parse(href);
                 //console.log("An external URL is: " + href);
     			/*var options = {

@@ -6,6 +6,7 @@ var preTest = require('./pre/pre_tests'),
     postTest = require('./post/post_tests');
 
 var async = require('async'),
+    cheerio = require('cheerio'),
     jsdom = require('jsdom'),
     wrench = require('wrench'),
     colors = require('colors');
@@ -39,47 +40,42 @@ function runIndividualTest(fileName, callback) {
   var file = srcDir + "/" + fileName;
   if (file.match(new RegExp(ext + "$"))) {
     fs.readFile(file, 'utf8', function(err, content) { 
-      if (err) {
-        if (!fs.lstatSync(file).isDirectory()) {
-          console.error("Error starting to read file " + file);
-          console.error(err);
-          process.exit(1);
-        }
-      }
-
-      jsdom.env(content, function(err, window) {
         if (err) {
-          console.log(error);
-        }
+            if (!fs.lstatSync(file).isDirectory()) {
+              console.error("Error starting to read file " + file);
+              console.error(err);
+              process.exit(1);
+            }
+          }
         
-        doc = window.document;
-        readFiles[file] = doc;
-
+        $ = cheerio.load(content);
+            
+        readFiles[file] = $;
+        
         async.parallel([
             function(cb) {
-              preTest.checkMissingAltTag(file, doc, options, function(errors) {
+              preTest.checkMissingAltTag(file, $, options, function(errors) {
                 checkForErrors(errors, stopOnFail, cb);
               });
             },
             function(cb) {
-              preTest.checkBrokenExternalLink(file, doc, options, function(errors) {
+              preTest.checkBrokenExternalLink(file, $, options, function(errors) {
                 checkForErrors(errors, stopOnFail, cb);
               });
             },
             function(cb) {
-              postTest.checkMissingImage(file, doc, options, function(errors) {
+              postTest.checkMissingImage(file, $, options, function(errors) {
                 checkForErrors(errors, stopOnFail, cb);
               });
             },
             function(cb) {
-              postTest.checkBrokenLocalLink(file, doc, readFiles, options, function(errors) {
+              postTest.checkBrokenLocalLink(file, $, readFiles, options, function(errors) {
                 checkForErrors(errors, stopOnFail, cb);
               });
             }
           ], function(err, results) {
               callback(err);
         });
-      });
     });
   }
   else {

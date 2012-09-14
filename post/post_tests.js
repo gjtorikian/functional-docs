@@ -1,18 +1,18 @@
 var fs = require('fs');
 var path = require('path');
 
-var jsdom = require('jsdom'),
+var cheerio = require('cheerio'),
     wrench = require('wrench');
 
 var helpers = require('../helpers');
 
-exports.checkMissingImage = function(filename, doc, options, callback) {
+exports.checkMissingImage = function(filename, $, options, callback) {
     var errors = [];
-    var imgList = doc.getElementsByTagName("img");
+    var imgList = $("img");
 
     if (imgList !== undefined) {
         for (var i = 0; i < imgList.length; i++) {
-            var src = imgList[i].getAttribute("src");
+            var src = $(imgList[i]).attr("src");
 
             if (src === undefined || src.length === 0) {
                 errors.push(printMessage("Missing src attribute", filename));//, l, lines[l]));
@@ -51,13 +51,13 @@ exports.checkMissingImage = function(filename, doc, options, callback) {
     callback(errors);
 };
 
-exports.checkBrokenLocalLink = function(filename, doc, readFiles, options, callback) {
+exports.checkBrokenLocalLink = function(filename, $, readFiles, options, callback) {
     var errors = [];
-    var aList = doc.getElementsByTagName("a");
+    var aList = $("a");
 
     if (aList !== undefined) {
         for (var i = 0; i < aList.length; i++) {
-            var href = aList[i].getAttribute("href");
+            var href = $(aList[i]).attr("href");
 
             if (href !== undefined && href.length > 0) {
                 // not an external link, or ignorable link (/,, #)
@@ -78,16 +78,16 @@ exports.checkBrokenLocalLink = function(filename, doc, readFiles, options, callb
                                 // then, validate the hash ref
 
                                 // prevent too many files from being read--just see if the content exists already
-                                var hashDoc = readFiles[filepath];
+                                var hash$ = readFiles[filepath];
 
-                                if (hashDoc == undefined) {
+                                if (hash$ == undefined) {
                                     var content = fs.readFileSync(filepath, 'utf8');
-                                    hashDoc = jsdom.jsdom(content);
-                                    readFiles[filepath] = hashDoc;
+                                    hash$ = cheerio.load(content);
+                                    readFiles[filepath] = hash$;
                                 }
 
                                 // do the actual check (finally!)
-                                if (hashDoc.getElementById(hashId) === null) {
+                                if (hash$('#' + hashId) === null) {
                                     errors.push(printMessage(hashFile + " has an incorrect external hash to '#" + hashId +"'", filename));
                                 }
                                 else {
@@ -96,10 +96,10 @@ exports.checkBrokenLocalLink = function(filename, doc, readFiles, options, callb
                             } 
                         } 
                         else { // if the hash file doesn't exist, this is an internal hash (i.e. "href='#blah'")
-                            if (doc.getElementById(hashId) === null) {
+                            if ($('#' + hashId) === null) {
                                 // checking the name attribute; I weep to do this twice
                                 var foundName = false;
-                                var links = doc.getElementsByTagName('a');
+                                var links = $('a');
                           
                                 for (var l = 0; l< links.length; l++){
                                   var n = links[l].getAttribute("name");

@@ -28,7 +28,8 @@ exports.runTests = function(src, opts, callback) {
       process.exit(1);
     }
 
-    async.forEach(srcFiles, runIndividualTest, function (err) {
+    // damn EMFILE limit, seems to crash at around 80
+    async.forEachLimit(srcFiles, 75, runIndividualTest, function (err) {
         console.log("Finished running tests on " + srcDir);
         return callback(err);
     });

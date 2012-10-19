@@ -103,14 +103,13 @@ exports.checkBrokenLocalLink = function(filename, $, readFiles, options, callbac
                                     readFiles[filepath] = hash$;
                                 }
 
+                                hashId = hashId.replace(/\./g, "\\.");
                                 var hashElement = hash$("#" + hashId);
                                 var hashName = hash$("[name=" + hashId + "]");
-
+                                    
                                 // do the actual check (finally!)
-                                if (hashName.length <= 0) {
-                                    hashName = hash$("[id=" + hashId + "]");
-                                    if (hashName.length <= 0)
-                                        errors.push(printMessage(filename, hashFile + " has an incorrect internal hash to '#" + hashId +"'"));
+                                if (hashElement.length <= 0 && hashName.length <= 0) {
+                                    errors.push(printMessage(filename, filepath + " has an incorrect internal hash to '#" + hashId +"'"));
                                 }
                                 else {
                                     //console.log("Yes, " + hashFile + "#" + hashId + " is okay.");

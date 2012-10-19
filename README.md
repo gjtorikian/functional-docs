@@ -29,6 +29,17 @@ funcDoc.runTests([ './files'], {stopOnFail: false, ext: ".html"}, function(err) 
 	* `stopOnFail` indicates if you want the testing to stop once a failure is found; defaults to `false`
 	* `ext` indicates the extension of the files you want to test; defaults to ".html"
 	* `mapPrefix`: if images start with a `/`, the test assumes it's at `./`. This is mostly for routing compatability with express.
+	* `remap`: an object that contains two properties, `links` and `images, which define rerouting rules. This is mostly for routing compatability with express. For example:  
+	```
+	remap: {
+            links: {
+                "/path": __dirname + "/out/path", 
+                "/path1/path2": __dirname + "/out/path1/path2", 
+            }, 
+            images: {}
+      }
+    ```
+    In this context, your source files would have an href to "/path" and "/path1/path2". Express will add routes to these paths (because you defined them). Meanwhile, the tester will actually _look_ for the files in _dirname + "/out/path"_. The tester will not change the content of your HTML files; it'll only resolve links it finds as "/path" as if they referred to _dirname + "/out/path"_.
 * A callback function to execute upon completion
 
 # What's Tested?
@@ -42,4 +53,4 @@ funcDoc.runTests([ './files'], {stopOnFail: false, ext: ".html"}, function(err) 
 
 If you think about it, some tests can actually be run _before_ you compile into HTML. For example, if I was writing documentation in Markdown ([which I do](https://github.com/gjtorikian/panda-docs)), I could just check to see if `![]` was erronously references. I've grouped this distinction in folders marked _pre_ and _post_.
 
-Then I started thinking that users might write their docs in reStructuredText, AsciiDoc, Pandoc, or some other format, so I decided to just focus right now on the rendered HTML output, and concentrate on catching formats as time allowed.
+Then I started thinking that users might write their docs in reStructuredText, AsciiDoc, Pandoc, or some other format, so I decided to just focus right now on the rendered HTML output, and concentrate on catching markup languages if the time ever allows.

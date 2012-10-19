@@ -33,6 +33,19 @@ exports.checkMissingImage = function(filename, $, options, callback) {
                 }
                 refDirName = path.resolve(path.dirname(filename), refDirName);
 
+                if (options.remap.images[refDirName] !== undefined) {
+                    var remappedRef = options.remap.images[refDirName];
+                    if (remappedRef == "ignore")
+                        return true;
+                    refDirName = remappedRef;
+                }
+                if (options.remap.images[refFileName] !== undefined) {
+                    var remappedRef = options.remap.images[refFileName];
+                    if (remappedRef == "ignore")
+                        return true;
+                    refFileName = remappedRef;
+                }
+                
                 if (!path.existsSync(refDirName + "/" + refFileName)) {
                     errors.push(printMessage(filename,  "image " + src + " does not exist"));
                 }
@@ -59,7 +72,7 @@ exports.checkBrokenLocalLink = function(filename, $, readFiles, options, callbac
         for (var i = 0; i < aList.length; i++) {
             var href = $(aList[i]).attr("href");
 
-            if (href !== undefined && href.length > 0) {
+            if (href !== undefined && href.length > 0 ) {
                 // not an external link, or ignorable link (/,, #)
                 if (!href.match(/www/) && !href.match(/https?:/) && !href.match(/^mailto:/) && href !== '/' && href != '#' && href != 'javascript:void(0)')  {
                     var filepath = path.resolve(path.dirname(filename) + "/"  + href);
@@ -68,15 +81,19 @@ exports.checkBrokenLocalLink = function(filename, $, readFiles, options, callbac
                         var hashFile = href.substr(0, href.indexOf("#"));
                         var hashId = href.substr(href.indexOf("#") + 1); 
 
-                        // there's a file associated with the hash
+                        // there's a different file associated with the hash
                         if (hashFile.length > 0) {
                             filepath = path.resolve(path.dirname(filename) + "/"  + hashFile);
                             
                             // check if file exists first
-                            if (fileCheck(hashFile, filename, filepath, false, errors)) {
+                            if (fileCheck(options, hashFile, filename, filepath, false, errors)) {
                                 // console.log(hashFile + " is legit. Let's check " + hashId);
                                 // then, validate the hash ref
-
+                            
+                                var hashFileDir = path.dirname(hashFile);
+                                if (options.remap.links[hashFileDir] !== undefined)
+                                    filepath = options.remap.links[hashFileDir] + "/" + hashFile.replace(hashFileDir, "");
+                                    
                                 // prevent too many files from being read--just see if the content exists already
                                 var hash$ = readFiles[filepath];
                                 
@@ -86,14 +103,14 @@ exports.checkBrokenLocalLink = function(filename, $, readFiles, options, callbac
                                     readFiles[filepath] = hash$;
                                 }
 
-                                var hashElement = $("#" + hashId);
-                                var hashName = $("[name=" + hashId + "]");
+                                var hashElement = hash$("#" + hashId);
+                                var hashName = hash$("[name=" + hashId + "]");
 
                                 // do the actual check (finally!)
-                                if (hashElement === undefined && hashName === undefined) {
-                                    console.log(hashElement)
-                                    console.log(hashName)
-                                    errors.push(printMessage(filename, hashFile + " has an incorrect external hash to '#" + hashId +"'"));
+                                if (hashName.length <= 0) {
+                                    hashName = hash$("[id=" + hashId + "]");
+                                    if (hashName.length <= 0)
+                                        errors.push(printMessage(filename, hashFile + " has an incorrect internal hash to '#" + hashId +"'"));
                                 }
                                 else {
                                     //console.log("Yes, " + hashFile + "#" + hashId + " is okay.");
@@ -121,7 +138,7 @@ exports.checkBrokenLocalLink = function(filename, $, readFiles, options, callbac
                         }
                     }
                     else {
-                        fileCheck(href, filename, filepath, true, errors);
+                        fileCheck(options, href, filename, filepath, true, errors);
                     }
                 }
             }
@@ -131,7 +148,7 @@ exports.checkBrokenLocalLink = function(filename, $, readFiles, options, callbac
   callback(errors);
 };
 
-function fileCheck(href, file, filepath, noHash, errors)
+function fileCheck(options, href, file, filepath, noHash, errors)
 {
     var found = false;
     var lastSlashPos = href.lastIndexOf("/");
@@ -143,7 +160,19 @@ function fileCheck(href, file, filepath, noHash, errors)
     }
     
     refDirName = path.resolve(path.dirname(file), refDirName);
-
+    if (options.remap.links[refDirName] !== undefined) {
+        var remappedRef = options.remap.links[refDirName];
+        if (remappedRef == "ignore")
+            return true;
+        refDirName = remappedRef;
+    }
+    if (options.remap.links[refFileName] !== undefined) {
+        var remappedRef = options.remap.links[refFileName];
+        if (remappedRef == "ignore")
+            return true;
+        refFileName = remappedRef;
+    }
+    
     if (!path.existsSync(refDirName)) {
         errors.push(printMessage(file, " trying to link to " + refDirName + ", which isn't a directory"));
         return false;

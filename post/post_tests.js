@@ -33,13 +33,13 @@ exports.checkMissingImage = function(filename, $, options, callback) {
                 }
                 refDirName = path.resolve(path.dirname(filename), refDirName);
 
-                if (options.remap.images[refDirName] !== undefined) {
+                if (options.remap && options.remap.images[refDirName] !== undefined) {
                     var remappedRef = options.remap.images[refDirName];
                     if (remappedRef == "ignore")
                         return true;
                     refDirName = remappedRef;
                 }
-                if (options.remap.images[refFileName] !== undefined) {
+                if (options.remap && options.remap.images[refFileName] !== undefined) {
                     var remappedRef = options.remap.images[refFileName];
                     if (remappedRef == "ignore")
                         return true;
@@ -91,7 +91,7 @@ exports.checkBrokenLocalLink = function(filename, $, readFiles, options, callbac
                                 // then, validate the hash ref
                             
                                 var hashFileDir = path.dirname(hashFile);
-                                if (options.remap.links[hashFileDir] !== undefined)
+                                if (options.remap && options.remap.links[hashFileDir] !== undefined)
                                     filepath = options.remap.links[hashFileDir] + "/" + hashFile.replace(hashFileDir, "");
                                     
                                 // prevent too many files from being read--just see if the content exists already
@@ -159,13 +159,13 @@ function fileCheck(options, href, file, filepath, noHash, errors)
     }
     
     refDirName = path.resolve(path.dirname(file), refDirName);
-    if (options.remap.links[refDirName] !== undefined) {
+    if (options.remap && options.remap.links[refDirName] !== undefined) {
         var remappedRef = options.remap.links[refDirName];
         if (remappedRef == "ignore")
             return true;
         refDirName = remappedRef;
     }
-    if (options.remap.links[refFileName] !== undefined) {
+    if (options.remap && options.remap.links[refFileName] !== undefined) {
         var remappedRef = options.remap.links[refFileName];
         if (remappedRef == "ignore")
             return true;

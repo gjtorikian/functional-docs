@@ -17,7 +17,7 @@ exports.checkMissingImage = function(filename, $, options, callback) {
             if (src === undefined || src.length === 0) {
                 errors.push(filename, printMessage("Missing src attribute"));//, l, lines[l]));
             }
-            else {
+            else if (!src.match(/www/) && !src.match(/https?:/)) {
                 if (options.mapPrefix && src.charAt(0) == "/") {
                     src = "." + src;
                 }

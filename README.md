@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/gjtorikian/functional-docs.png)](http://travis-ci.org/gjtorikian/functional-docs)
 # Introduction
 
 Generate HTML files? Use them for documentation? Great, then this tool might be for you.

@@ -72,9 +72,16 @@ exports.checkBrokenLocalLink = function(filename, $, readFiles, options, callbac
         for (var i = 0; i < aList.length; i++) {
             var href = $(aList[i]).attr("href");
 
-            if (href !== undefined && href.length > 0 ) {
+            if (href !== undefined && href.length > 0) {
+                if (options.remap && options.remap.links[href] !== undefined)
+                    continue;
                 // not an external link, or ignorable link (/,, #)
-                if (!href.match(/www/) && !href.match(/https?:/) && !href.match(/^mailto:/) && href !== '/' && href != '#' && href != 'javascript:void(0)')  {
+                if (!href.match(/www/) && 
+                    !href.match(/https?:/) && 
+                    !href.match(/^mailto:/) && 
+                    href !== '/' && 
+                    href != '#' && 
+                    href != 'javascript:void(0)')  {
                     var filepath = path.resolve(path.dirname(filename) + "/"  + href);
                 
                     if (href.match(/\#/)) { // a reference to somewhere internal
@@ -157,7 +164,7 @@ function fileCheck(options, href, file, filepath, noHash, errors)
     if (refDirName.length === 0 || lastSlashPos < 0) {
         refDirName = path.dirname(filepath);
     }
-    
+
     refDirName = path.resolve(path.dirname(file), refDirName);
     if (options.remap && options.remap.links[refDirName] !== undefined) {
         var remappedRef = options.remap.links[refDirName];
@@ -165,6 +172,7 @@ function fileCheck(options, href, file, filepath, noHash, errors)
             return true;
         refDirName = remappedRef;
     }
+
     if (options.remap && options.remap.links[refFileName] !== undefined) {
         var remappedRef = options.remap.links[refFileName];
         if (remappedRef == "ignore")
@@ -177,7 +185,7 @@ function fileCheck(options, href, file, filepath, noHash, errors)
         return false;
     }
 
-    if (!path.existsSync(refDirName + "/" + refFileName)) {
+    if (!path.existsSync(refDirName + "/" + refFileName)) {   
         errors.push(printMessage(file, " trying to incorrectly link to " + href + " as " + filepath));
         return false;
     }

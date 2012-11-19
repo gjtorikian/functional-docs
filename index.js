@@ -49,7 +49,6 @@ function runIndividualTest(fileName, callback) {
           }
         
         $ = cheerio.load(content);
-            
         readFiles[file] = $;
         
         async.parallel([
@@ -70,6 +69,11 @@ function runIndividualTest(fileName, callback) {
             },
             function(cb) {
               postTest.checkBrokenLocalLink(file, $, readFiles, options, function(errors) {
+                checkForErrors(errors, stopOnFail, cb);
+              });
+            },
+            function(cb) {
+              postTest.checkSpelling(file, $, options, function(errors) {
                 checkForErrors(errors, stopOnFail, cb);
               });
             }

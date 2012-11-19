@@ -1,8 +1,10 @@
-var fs = require('fs');
-var path = require('path');
+var fs = require('fs'),
+    path = require('path'),
+    util = require("util");
 
 var cheerio = require('cheerio'),
-    wrench = require('wrench');
+    wrench = require('wrench'),
+    teacher = require('teacher');
 
 var helpers = require('../helpers');
 
@@ -203,6 +205,25 @@ function fileCheck(options, href, file, filepath, noHash, errors)
 
     return true;
 }
+
+exports.checkSpelling = function(filename, $, options, callback) {
+    var errors = [];
+
+    // remove code nodes that likely have non-English words
+    var _$ = $;
+    _$('pre').remove();
+    _$('code').remove();
+
+    teacher.check(_$("body").text(), function(err, data) {
+        if (data && data.length) {
+            data.forEach(function (typo) {
+                errors.push(printMessage(filename, " has a typo: " + util.inspect(typo, null, 2)));
+            });
+        }
+
+        callback(errors);
+    });
+};
 
 function printMessage(filename, msg, line, string) {
   return filename + ": " + msg;// + " around line " + line + ": " + string;

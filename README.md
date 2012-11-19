@@ -4,8 +4,6 @@ Generate HTML files? Use them for documentation? Great, then this tool might be 
 
 Here are a set of tests to validate your HTML output. These tests check if your image references are legitimate, if they have alt tags, if your internal links are working, and so on. It's intended to be an all-in-one checker for your documentation output.
 
-This does **not** check for grammar or spelling mistakes, nor stylistic issues (_e.g._, typing _e.g._ instead of e.g.)...but it might one day.
-
 # Usage
 
 Simple: install from npm:

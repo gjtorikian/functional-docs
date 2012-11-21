@@ -38,6 +38,7 @@ funcDoc.runTests([ './files'], {stopOnFail: false, ext: ".html"}, function(err) 
       }
     ```
     In this context, your source files would have an href to "/path" and "/path1/path2". Express will add routes to these paths (because you defined them). Meanwhile, the tester will actually _look_ for the files in _dirname + "/out/path"_. The tester will not change the content of your HTML files; it'll only resolve links it finds as "/path" as if they referred to _dirname + "/out/path"_.
+    * `safeWords` is an array of strings you want the spellchecker to ignore
 * A callback function to execute upon completion
 
 # What's Tested?

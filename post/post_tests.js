@@ -217,7 +217,17 @@ exports.checkSpelling = function(filename, $, options, callback) {
     teacher.check(_$("body").text(), function(err, data) {
         if (data && data.length) {
             data.forEach(function (typo) {
-                errors.push(printMessage(filename, " has a typo: " + util.inspect(typo, null, 2)));
+                var ignore = false;
+                if (options.safeWords && typo.type === "spelling") {
+                    for (var s = 0, l = options.safeWords.length; s < l; s++) {   
+                        if (options.safeWords[s] === typo.string) {
+                            ignore = true;
+                            break;
+                        }
+                    }
+                }
+                if (!ignore)
+                    errors.push(printMessage(filename, " has a typo: " + util.inspect(typo, null, 2)));
             });
         }
 

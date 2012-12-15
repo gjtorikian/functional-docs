@@ -73,9 +73,13 @@ function runIndividualTest(fileName, callback) {
               });
             },
             function(cb) {
-              postTest.checkSpelling(file, $, options, function(errors) {
-                checkForErrors(errors, stopOnFail, cb);
-              });
+              if (options.skipSpelling !== true) {
+                postTest.checkSpelling(file, $, options, function(errors) {
+                  checkForErrors(errors, stopOnFail, cb);
+                });
+              }
+              else
+                cb(null);
             }
           ], function(err, results) {
               callback(err);
